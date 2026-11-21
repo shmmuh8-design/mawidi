@@ -6,8 +6,10 @@ const CATS = [
   ['clinic','عيادة','🩺','#3fcf8e','#13804f'], ['beauty','تجميل وسبا','💆','#b57bff','#6a2fc2'], ['carwash','غسيل سيارات','🚗','#4fb4ff','#1b5fa8'],
   ['garage','ورشة','🔧','#ffa94d','#c2580f'], ['gym','نادي ومدرب','🏋️','#ff6b6b','#b3261e'], ['photo','تصوير','📸','#ffd43b','#c28a00'], ['other','أخرى','✨','#8fa3bf','#475a75']];
 const CAT = Object.fromEntries(CATS.map(c => [c[0], c]));
-const DAYS = ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
-const MON = ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const EN = window.LANG === 'en';
+const DAYS = EN ? ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'] : ['الأحد','الاثنين','الثلاثاء','الأربعاء','الخميس','الجمعة','السبت'];
+const MON = EN ? ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'] : ['يناير','فبراير','مارس','أبريل','مايو','يونيو','يوليو','أغسطس','سبتمبر','أكتوبر','نوفمبر','ديسمبر'];
+const PL = n => EN ? (PLACE_EN[n] || n) : n;
 
 const $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
 const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
@@ -16,7 +18,7 @@ const normPhone = p => { p = String(p || '').replace(/\D/g, '').replace(/^00/, '
 const localPhone = p => String(p || '').replace(/^968/, '');
 const ymd = d => d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0') + '-' + String(d.getDate()).padStart(2, '0');
 const dayName = s => { const d = new Date(s + 'T12:00:00'); return DAYS[d.getDay()] + ' ' + d.getDate() + ' ' + MON[d.getMonth()]; };
-const t12 = t => { const [h, m] = t.split(':').map(Number); return ((h % 12) || 12) + ':' + String(m).padStart(2, '0') + (h < 12 ? ' ص' : ' م'); };
+const t12 = t => { const [h, m] = t.split(':').map(Number); return ((h % 12) || 12) + ':' + String(m).padStart(2, '0') + (EN ? (h < 12 ? ' AM' : ' PM') : (h < 12 ? ' ص' : ' م')); };
 const ico = (cat, cls = '') => { const c = CAT[cat] || CAT.other; return `<span class="i3d ${cls}" style="--a:${c[3]};--b:${c[4]}"><span>${c[2]}</span></span>`; };
 function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2400); }
 
@@ -46,8 +48,8 @@ function render(){
 $$('#nav [data-v]').forEach(b => b.onclick = () => setView(b.dataset.v));
 
 /* ---------- home ---------- */
-function govOptions(sel){ return Object.keys(GOV).map(g => `<option ${g === sel ? 'selected' : ''}>${g}</option>`).join(''); }
-function wilOptions(gov, sel, any){ return (any ? `<option value="">كل الولايات</option>` : '') + (GOV[gov] || []).map(w => `<option ${w === sel ? 'selected' : ''}>${w}</option>`).join(''); }
+function govOptions(sel){ return Object.keys(GOV).map(g => `<option value="${g}" ${g === sel ? 'selected' : ''}>${PL(g)}</option>`).join(''); }
+function wilOptions(gov, sel, any){ return (any ? `<option value="">كل الولايات</option>` : '') + (GOV[gov] || []).map(w => `<option value="${w}" ${w === sel ? 'selected' : ''}>${PL(w)}</option>`).join(''); }
 function openSos(){
   const d = document.createElement('div'); d.className = 'sosbg';
   d.innerHTML = `<div class="sosbox" role="dialog" aria-label="طوارئ"><div style="font-size:46px">🚑</div><h2>حالة طارئة؟</h2><p>اتصل على رقم الطوارئ في عُمان مباشرة — الاتصال مجاني.</p>
@@ -59,7 +61,7 @@ function openSos(){
   const close = () => d.remove();
   d.onclick = e => { if(e.target === d) close(); }; $('#sosX').onclick = close;
   $('#sosLoc').onclick = () => {
-    const send = u => { location.href = 'https://wa.me/?text=' + encodeURIComponent('🚨 أحتاج مساعدة! هذا موقعي:\n' + u); };
+    const send = u => { location.href = 'https://wa.me/?text=' + encodeURIComponent(L('🚨 أحتاج مساعدة! هذا موقعي:\n', '🚨 I need help! My location:\n') + u); };
     if(!navigator.geolocation){ toast('الموقع مو متاح في جهازك'); return; }
     toast('جاري تحديد موقعك…');
     navigator.geolocation.getCurrentPosition(p => send('https://maps.google.com/?q=' + p.coords.latitude.toFixed(6) + ',' + p.coords.longitude.toFixed(6)),
@@ -69,14 +71,14 @@ function openSos(){
 async function renderHome(){
   $('#app').innerHTML = `
     <header class="hero">
-      <div class="brand">${'<span class="logo3d"><span>📅</span></span>'}<div><h1>موعدي</h1><small>احجز موعدك بضغطة — بدون انتظار</small></div><button class="sos" id="sosBtn">🚑 طوارئ</button></div>
+      <div class="brand">${'<span class="logo3d"><span>📅</span></span>'}<div><h1>موعدي</h1><small>احجز موعدك بضغطة — بدون انتظار</small></div><div class="hbtns"><button class="sos" id="sosBtn">🚑 طوارئ</button><button class="lng" id="lngBtn" data-raw>${EN ? 'عربي' : 'EN'}</button></div></div>
       <div class="where"><select id="gov" aria-label="المحافظة">${govOptions(S.gov)}</select><select id="wil" aria-label="الولاية">${wilOptions(S.gov, S.wilayat, true)}</select></div>
     </header>
     <h2 class="sec-h">وش تبي تحجز؟</h2>
     <div class="cats">${CATS.map(c => `<button class="cat ${S.cat === c[0] ? 'on' : ''}" data-cat="${c[0]}">${ico(c[0])}<b>${c[1]}</b></button>`).join('')}</div>
-    <div class="row-h"><h2 class="sec-h">${S.cat ? CAT[S.cat][1] : 'كل الأماكن'} ${S.wilayat ? '— ' + esc(S.wilayat) : '— ' + esc(S.gov)}</h2>${S.cat ? '<button class="link" id="allCats">عرض الكل</button>' : ''}</div>
+    <div class="row-h"><h2 class="sec-h">${S.cat ? CAT[S.cat][1] : 'كل الأماكن'} ${S.wilayat ? '— ' + esc(PL(S.wilayat)) : '— ' + esc(PL(S.gov))}</h2>${S.cat ? '<button class="link" id="allCats">عرض الكل</button>' : ''}</div>
     <div id="list"><div class="sk"></div><div class="sk"></div></div>`;
-  $('#sosBtn').onclick = openSos;
+  $('#sosBtn').onclick = openSos; $('#lngBtn').onclick = () => setLang(EN ? 'ar' : 'en');
   $('#gov').onchange = e => { S.gov = e.target.value; S.wilayat = ''; saveS(); renderHome(); };
   $('#wil').onchange = e => { S.wilayat = e.target.value; saveS(); renderHome(); };
   $$('[data-cat]').forEach(b => b.onclick = () => { S.cat = S.cat === b.dataset.cat ? '' : b.dataset.cat; saveS(); renderHome(); });
@@ -84,7 +86,7 @@ async function renderHome(){
   try{
     const list = await rpc('mw_list', { p_cat:S.cat, p_gov:S.gov, p_wilayat:S.wilayat });
     if(view !== 'home') return;
-    $('#list').innerHTML = list.length ? list.map(b => `<button class="bcard" data-id="${b.id}">${ico(b.cat, 'md')}<span class="bc-t"><b>${esc(b.name)}</b><small>📍 ${esc(b.wilayat)}${b.area ? ' · ' + esc(b.area) : ''}</small><small>🕘 ${t12(b.open)} – ${t12(b.close)}</small></span><span class="go">احجز ‹</span></button>`).join('')
+    $('#list').innerHTML = list.length ? list.map(b => `<button class="bcard" data-id="${b.id}">${ico(b.cat, 'md')}<span class="bc-t"><b data-raw>${esc(b.name)}</b><small>📍 ${esc(PL(b.wilayat))}${b.area ? ' · ' + esc(b.area) : ''}</small><small>🕘 ${t12(b.open)} – ${t12(b.close)}</small></span><span class="go">احجز ‹</span></button>`).join('')
       : `<div class="empty"><span class="e3d">🗓️</span><b>ما فيه أماكن هنا للحين</b>تعرف محل يستقبل مواعيد؟ قل له يسجّل في موعدي مجاناً من تبويب «لصاحب المحل».</div>`;
     $$('.bcard').forEach(b => b.onclick = () => openBiz(b.dataset.id, list.find(x => x.id === b.dataset.id)));
   }catch(e){ $('#list').innerHTML = `<div class="empty">${esc(e.message)}</div>`; }
@@ -102,7 +104,7 @@ async function renderBiz(){
   const c = CAT[b.cat] || CAT.other;
   $('#app').innerHTML = `
     <div class="top"><button class="back" id="back">‹ رجوع</button><button class="link" id="share">مشاركة 🔗</button></div>
-    <section class="bhead" style="--a:${c[3]};--b:${c[4]}">${ico(b.cat, 'lg')}<div><h1>${esc(b.name)}</h1><small>${c[1]} · 📍 ${esc(b.wilayat)}${b.area ? '، ' + esc(b.area) : ''}</small></div></section>
+    <section class="bhead" style="--a:${c[3]};--b:${c[4]}">${ico(b.cat, 'lg')}<div><h1 data-raw>${esc(b.name)}</h1><small>${c[1]} · 📍 ${esc(PL(b.wilayat))}${b.area ? '، ' + esc(b.area) : ''}</small></div></section>
     ${b.about ? `<p class="about">${esc(b.about)}</p>` : ''}
     <div class="acts"><a class="btn ghost" href="https://wa.me/${b.phone}" target="_blank" rel="noopener">💬 واتساب</a><a class="btn ghost" href="tel:+${b.phone}">📞 اتصال</a></div>
     ${b.services.length ? `<h2 class="sec-h">الخدمات</h2><div class="svcs">${b.services.map((s, k) => `<button class="svc" data-s="${k}"><b>${esc(s.n)}</b>${s.p ? `<small>${(+s.p).toFixed(3).replace(/\.?0+$/, '')} ر.ع</small>` : ''}</button>`).join('')}</div>` : ''}
@@ -113,7 +115,7 @@ async function renderBiz(){
     <div id="form"></div>
     <button class="link rep" id="rep">🚩 الإبلاغ عن هذا المكان</button>`;
   $('#back').onclick = () => setView('home');
-  $('#share').onclick = () => { const u = location.origin + location.pathname + '?b=' + b.id; const t = 'احجز موعدك في ' + b.name + ' عن طريق موعدي:\n' + u; if(navigator.share) navigator.share({ text:t }).catch(() => {}); else { navigator.clipboard?.writeText(u); toast('تم نسخ الرابط'); } };
+  $('#share').onclick = () => { const u = location.origin + location.pathname + '?b=' + b.id; const t = L('احجز موعدك في ' + b.name + ' عن طريق موعدي:\n', 'Book your appointment at ' + b.name + ' with Mawidi:\n') + u; if(navigator.share) navigator.share({ text:t }).catch(() => {}); else { navigator.clipboard?.writeText(u); toast('تم نسخ الرابط'); } };
   $('#rep').onclick = async () => { const r = prompt('وش المشكلة؟ (اختياري)'); if(r === null) return; try{ await rpc('mw_report', { p_id:b.id, p_reason:r }); toast('شكراً، وصل البلاغ'); }catch(e){ toast(e.message); } };
   $$('.svc').forEach(x => x.onclick = () => { $$('.svc').forEach(y => y.classList.toggle('on', y === x && !x.classList.contains('on'))); });
   $$('.day').forEach(x => x.onclick = () => { pickDay = x.dataset.d; pickT = ''; $$('.day').forEach(y => y.classList.toggle('on', y === x)); loadSlots(); });
@@ -145,7 +147,7 @@ function showForm(){
       ME.name = name; ME.phone = phone; LS.set('mw-me', ME);
       codes = [r.code, ...codes.filter(c => c !== r.code)].slice(0, 40); LS.set('mw-codes', codes);
       $('#form').innerHTML = `<div class="card done"><span class="e3d">✅</span><h3>تم الحجز!</h3><p>${esc(biz.name)}<br>${dayName(pickDay)} · ${t12(pickT)}</p><p class="code">رقم الحجز: <b dir="ltr">${r.code}</b></p>
-        <a class="btn" target="_blank" rel="noopener" href="https://wa.me/${biz.phone}?text=${encodeURIComponent('السلام عليكم، حجزت موعد عن طريق موعدي\n' + dayName(pickDay) + ' الساعة ' + t12(pickT) + (sv ? '\nالخدمة: ' + sv : '') + '\nالاسم: ' + name + '\nرقم الحجز: ' + r.code)}">💬 أرسل تأكيد للمحل</a>
+        <a class="btn" target="_blank" rel="noopener" href="https://wa.me/${biz.phone}?text=${encodeURIComponent(L('السلام عليكم، حجزت موعد عن طريق موعدي\n' + dayName(pickDay) + ' الساعة ' + t12(pickT) + (sv ? '\nالخدمة: ' + sv : '') + '\nالاسم: ' + name + '\nرقم الحجز: ' + r.code, 'Hello, I booked an appointment via Mawidi\n' + dayName(pickDay) + ' at ' + t12(pickT) + (sv ? '\nService: ' + sv : '') + '\nName: ' + name + '\nBooking no.: ' + r.code))}">💬 أرسل تأكيد للمحل</a>
         <button class="btn ghost" id="toMine">حجوزاتي</button></div>`;
       $('#toMine').onclick = () => setView('mine');
       loadSlotsSilently();
@@ -162,7 +164,7 @@ async function renderMine(){
   try{
     const list = await rpc('mw_my', { p_codes:codes }), now = ymd(new Date());
     const up = list.filter(k => k.day >= now && k.status === 'booked'), old = list.filter(k => !(k.day >= now && k.status === 'booked')).reverse();
-    const row = k => `<div class="card bk">${ico(k.biz.cat, 'md')}<div class="bk-t"><b>${esc(k.biz.name)}</b><small>📅 ${dayName(k.day)} · 🕘 ${t12(k.t)}</small>${k.service ? `<small>✂️ ${esc(k.service)}</small>` : ''}<small>رقم الحجز: <span dir="ltr">${k.code}</span></small></div><span class="st ${ST[k.status][1]}">${ST[k.status][0]}</span>
+    const row = k => `<div class="card bk">${ico(k.biz.cat, 'md')}<div class="bk-t"><b data-raw>${esc(k.biz.name)}</b><small>📅 ${dayName(k.day)} · 🕘 ${t12(k.t)}</small>${k.service ? `<small>✂️ ${esc(k.service)}</small>` : ''}<small>رقم الحجز: <span dir="ltr">${k.code}</span></small></div><span class="st ${ST[k.status][1]}">${ST[k.status][0]}</span>
       ${k.status === 'booked' && k.day >= now ? `<div class="bk-a"><a class="btn ghost sm" href="https://wa.me/${k.biz.phone}" target="_blank" rel="noopener">💬 المحل</a><button class="btn ghost sm red" data-cx="${k.code}">إلغاء الحجز</button></div>` : ''}</div>`;
     $('#mine').innerHTML = (up.length ? `<h2 class="sec-h">القادمة</h2>${up.map(row).join('')}` : '<div class="empty">ما عندك مواعيد قادمة</div>') + (old.length ? `<h2 class="sec-h">السابقة</h2>${old.slice(0, 20).map(row).join('')}` : '');
     $$('[data-cx]').forEach(b => b.onclick = async () => { if(!confirm('متأكد تبي تلغي الحجز؟')) return; try{ await rpc('mw_cancel', { p_code:b.dataset.cx }); toast('تم إلغاء الحجز'); renderMine(); }catch(e){ toast(e.message); } });
@@ -177,9 +179,9 @@ async function renderOwn(){
   const b = ownData, today = ymd(new Date()), until = b.paid_until && b.paid_until > b.trial_until ? b.paid_until : b.trial_until;
   const left = Math.ceil((new Date(until + 'T23:59:59') - new Date()) / 864e5);
   $('#app').innerHTML = `
-    <div class="ptitle"><div><small>لصاحب المحل</small><h1>${esc(b.name)}</h1></div>${ico(b.cat, 'md')}</div>
+    <div class="ptitle"><div><small>لصاحب المحل</small><h1 data-raw>${esc(b.name)}</h1></div>${ico(b.cat, 'md')}</div>
     <div class="plan ${left <= 5 ? 'warn' : ''}">${b.paid_until && b.paid_until >= today ? `✅ اشتراكك فعّال لين ${until}` : left > 0 ? `🎁 الفترة المجانية: باقي ${left} يوم` : '⛔ انتهت الفترة المجانية — محلك مخفي عن الزبائن'}
-      <a href="https://wa.me/${OWNER_WA}?text=${encodeURIComponent('السلام عليكم، أبي أشترك في موعدي لمحل: ' + b.name + ' (' + localPhone(b.phone) + ')')}" target="_blank" rel="noopener">اشترك ‹</a></div>
+      <a href="https://wa.me/${OWNER_WA}?text=${encodeURIComponent(L('السلام عليكم، أبي أشترك في موعدي لمحل: ', 'Hello, I want to subscribe to Mawidi for: ') + b.name + ' (' + localPhone(b.phone) + ')')}" target="_blank" rel="noopener">اشترك ‹</a></div>
     ${!b.active ? '<div class="plan warn">⏸️ الحجز موقوف — فعّله من الإعدادات</div>' : ''}
     <div class="seg">${[['day','📋 الحجوزات'],['set','⚙️ الإعدادات']].map(([k, n]) => `<button data-ot="${k}" class="${ownTab === k ? 'on' : ''}">${n}</button>`).join('')}</div>
     <div id="ownBody"></div>`;
@@ -193,13 +195,13 @@ async function ownBookings(){
     <div id="ownList"><div class="sk"></div></div>
     <button class="btn ghost" id="shareMe">🔗 شارك رابط الحجز مع زبائنك</button>`;
   $$('#ownBody .day').forEach(x => x.onclick = () => { ownDay = x.dataset.d; ownBookings(); });
-  $('#shareMe').onclick = () => { const u = location.origin + location.pathname + '?b=' + b.id, t = 'احجز موعدك في ' + b.name + ' بسهولة:\n' + u; if(navigator.share) navigator.share({ text:t }).catch(() => {}); else { navigator.clipboard?.writeText(t); toast('تم نسخ الرابط'); } };
+  $('#shareMe').onclick = () => { const u = location.origin + location.pathname + '?b=' + b.id, t = L('احجز موعدك في ' + b.name + ' بسهولة:\n', 'Book your appointment at ' + b.name + ' easily:\n') + u; if(navigator.share) navigator.share({ text:t }).catch(() => {}); else { navigator.clipboard?.writeText(t); toast('تم نسخ الرابط'); } };
   rpc('mw_biz_stats', { p_phone:OWN.phone, p_code:OWN.code }).then(s => { $('#stats').innerHTML = [['اليوم', s.today], ['هالأسبوع', s.week], ['هالشهر', s.month], ['ما حضروا', s.noshow]].map(([n, v]) => `<div><b>${v}</b><small>${n}</small></div>`).join(''); }).catch(() => {});
   try{
     const list = await rpc('mw_biz_day', { p_phone:OWN.phone, p_code:OWN.code, p_day:ownDay });
     $('#ownList').innerHTML = list.length ? list.map(k => `<div class="card ob ${k.status}"><div class="ob-t"><b>${t12(k.t)}</b><span class="st ${ST[k.status][1]}">${ST[k.status][0]}</span></div>
       <div class="ob-n">${esc(k.name)}${k.service ? ' · ' + esc(k.service) : ''}<small dir="ltr">+${k.phone}</small></div>
-      <div class="bk-a"><a class="btn ghost sm" target="_blank" rel="noopener" href="https://wa.me/${k.phone}?text=${encodeURIComponent('السلام عليكم ' + k.name + '، تذكير بموعدك في ' + b.name + '\n' + dayName(ownDay) + ' الساعة ' + t12(k.t) + '\nننتظرك 🌹')}">🔔 تذكير</a><a class="btn ghost sm" href="tel:+${k.phone}">📞</a>
+      <div class="bk-a"><a class="btn ghost sm" target="_blank" rel="noopener" href="https://wa.me/${k.phone}?text=${encodeURIComponent(L('السلام عليكم ' + k.name + '، تذكير بموعدك في ' + b.name + '\n' + dayName(ownDay) + ' الساعة ' + t12(k.t) + '\nننتظرك 🌹', 'Hello ' + k.name + ', a reminder of your appointment at ' + b.name + '\n' + dayName(ownDay) + ' at ' + t12(k.t) + '\nSee you soon 🌹'))}">🔔 تذكير</a><a class="btn ghost sm" href="tel:+${k.phone}">📞</a>
       ${k.status === 'booked' ? `<button class="btn ghost sm" data-set="done" data-id="${k.id}">✓ حضر</button><button class="btn ghost sm" data-set="noshow" data-id="${k.id}">ما حضر</button><button class="btn ghost sm red" data-set="cancelled" data-id="${k.id}">إلغاء</button>` : `<button class="btn ghost sm" data-set="booked" data-id="${k.id}">↩︎ رجّعه</button>`}</div></div>`).join('')
       : `<div class="empty"><span class="e3d">☕</span><b>ما فيه حجوزات في ${dayName(ownDay)}</b>${b.days.includes(new Date(ownDay + 'T12:00').getDay()) ? 'شارك رابط الحجز مع زبائنك.' : 'هذا يوم إجازة.'}</div>`;
     $$('[data-set]').forEach(x => x.onclick = async () => { try{ await rpc('mw_biz_set', { p_phone:OWN.phone, p_code:OWN.code, p_id:+x.dataset.id, p_status:x.dataset.set }); ownBookings(); }catch(e){ toast(e.message); } });
