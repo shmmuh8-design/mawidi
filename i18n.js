@@ -59,12 +59,13 @@ const I18N = {
   'رقم الهاتف أو الرمز غير صحيح':'Wrong phone number or PIN','هذا الرقم مسجّل، ادخل بحسابك':'This number is already registered — please log in','هذا الوقت انحجز، اختر وقت ثاني':'This time was just taken, choose another',
   'الرمز لازم يكون من 4 إلى 8 أرقام':'The PIN must be 4–8 digits','المحل غير متاح':'This business is unavailable','الوقت غير متاح':'This time is unavailable','اليوم غير متاح':'This day is unavailable',
   'حالة غير صحيحة':'Invalid status','عندك حجزين في نفس اليوم':'You already have two bookings on this day','وقت الإغلاق لازم يكون بعد وقت الفتح':'Closing time must be after opening time',
-  'اشترك':'Subscribe','عربي':'عربي','English':'English'
+  'اشترك':'Subscribe','⛔ حسابك غير فعّال حالياً — محلك مخفي عن الزبائن':'⛔ Your account is not active — your business is hidden from customers','عربي':'عربي','English':'English'
 };
 const I18N_RX = [
   [/^🎁 الفترة المجانية: باقي (\d+) يوم$/, (m, n) => `🎁 Free trial: ${n} day${n == 1 ? '' : 's'} left`],
   [/^✅ اشتراكك فعّال لين (.+)$/, (m, d) => `✅ Subscription active until ${d}`],
   [/^ما فيه حجوزات في (.+)$/, (m, d) => `No bookings on ${d}`],
+  [/^✅ حسابك فعّال لين (.+)$/, (m, d) => `✅ Your account is active until ${d}`],
   [/^(\d+) دقيقة$/, (m, n) => `${n} min`],
   [/^(.+) ر\.ع$/, (m, n) => `${n} OMR`]
 ];

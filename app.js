@@ -1,6 +1,9 @@
 /* موعدي — حجز المواعيد في عُمان */
 const SB = window.MW_SB;
 const OWNER_WA = '96894005400';
+const NATIVE = !!(window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform());
+const SITE = 'https://shmmuh8-design.github.io/mawidi/';
+const bizLink = id => (NATIVE ? SITE : location.origin + location.pathname) + '?b=' + id;
 const CATS = [
   ['barber','حلاق','💈','#3d7bfd','#1a3fa8'], ['salon','صالون نسائي','💅','#ff6fae','#b8246c'], ['dental','عيادة أسنان','🦷','#38c6d9','#11798a'],
   ['clinic','عيادة','🩺','#3fcf8e','#13804f'], ['beauty','تجميل وسبا','💆','#b57bff','#6a2fc2'], ['carwash','غسيل سيارات','🚗','#4fb4ff','#1b5fa8'],
@@ -115,7 +118,7 @@ async function renderBiz(){
     <div id="form"></div>
     <button class="link rep" id="rep">🚩 الإبلاغ عن هذا المكان</button>`;
   $('#back').onclick = () => setView('home');
-  $('#share').onclick = () => { const u = location.origin + location.pathname + '?b=' + b.id; const t = L('احجز موعدك في ' + b.name + ' عن طريق موعدي:\n', 'Book your appointment at ' + b.name + ' with Mawidi:\n') + u; if(navigator.share) navigator.share({ text:t }).catch(() => {}); else { navigator.clipboard?.writeText(u); toast('تم نسخ الرابط'); } };
+  $('#share').onclick = () => { const u = bizLink(b.id); const t = L('احجز موعدك في ' + b.name + ' عن طريق موعدي:\n', 'Book your appointment at ' + b.name + ' with Mawidi:\n') + u; if(navigator.share) navigator.share({ text:t }).catch(() => {}); else { navigator.clipboard?.writeText(u); toast('تم نسخ الرابط'); } };
   $('#rep').onclick = async () => { const r = prompt('وش المشكلة؟ (اختياري)'); if(r === null) return; try{ await rpc('mw_report', { p_id:b.id, p_reason:r }); toast('شكراً، وصل البلاغ'); }catch(e){ toast(e.message); } };
   $$('.svc').forEach(x => x.onclick = () => { $$('.svc').forEach(y => y.classList.toggle('on', y === x && !x.classList.contains('on'))); });
   $$('.day').forEach(x => x.onclick = () => { pickDay = x.dataset.d; pickT = ''; $$('.day').forEach(y => y.classList.toggle('on', y === x)); loadSlots(); });
@@ -180,8 +183,8 @@ async function renderOwn(){
   const left = Math.ceil((new Date(until + 'T23:59:59') - new Date()) / 864e5);
   $('#app').innerHTML = `
     <div class="ptitle"><div><small>لصاحب المحل</small><h1 data-raw>${esc(b.name)}</h1></div>${ico(b.cat, 'md')}</div>
-    <div class="plan ${left <= 5 ? 'warn' : ''}">${b.paid_until && b.paid_until >= today ? `✅ اشتراكك فعّال لين ${until}` : left > 0 ? `🎁 الفترة المجانية: باقي ${left} يوم` : '⛔ انتهت الفترة المجانية — محلك مخفي عن الزبائن'}
-      <a href="https://wa.me/${OWNER_WA}?text=${encodeURIComponent(L('السلام عليكم، أبي أشترك في موعدي لمحل: ', 'Hello, I want to subscribe to Mawidi for: ') + b.name + ' (' + localPhone(b.phone) + ')')}" target="_blank" rel="noopener">اشترك ‹</a></div>
+    ${NATIVE ? `<div class="plan ${left <= 5 ? 'warn' : ''}">${left > 0 ? `✅ حسابك فعّال لين ${until}` : '⛔ حسابك غير فعّال حالياً — محلك مخفي عن الزبائن'}</div>` : `<div class="plan ${left <= 5 ? 'warn' : ''}">${b.paid_until && b.paid_until >= today ? `✅ اشتراكك فعّال لين ${until}` : left > 0 ? `🎁 الفترة المجانية: باقي ${left} يوم` : '⛔ انتهت الفترة المجانية — محلك مخفي عن الزبائن'}
+      <a href="https://wa.me/${OWNER_WA}?text=${encodeURIComponent(L('السلام عليكم، أبي أشترك في موعدي لمحل: ', 'Hello, I want to subscribe to Mawidi for: ') + b.name + ' (' + localPhone(b.phone) + ')')}" target="_blank" rel="noopener">اشترك ‹</a></div>`}
     ${!b.active ? '<div class="plan warn">⏸️ الحجز موقوف — فعّله من الإعدادات</div>' : ''}
     <div class="seg">${[['day','📋 الحجوزات'],['set','⚙️ الإعدادات']].map(([k, n]) => `<button data-ot="${k}" class="${ownTab === k ? 'on' : ''}">${n}</button>`).join('')}</div>
     <div id="ownBody"></div>`;
@@ -195,7 +198,7 @@ async function ownBookings(){
     <div id="ownList"><div class="sk"></div></div>
     <button class="btn ghost" id="shareMe">🔗 شارك رابط الحجز مع زبائنك</button>`;
   $$('#ownBody .day').forEach(x => x.onclick = () => { ownDay = x.dataset.d; ownBookings(); });
-  $('#shareMe').onclick = () => { const u = location.origin + location.pathname + '?b=' + b.id, t = L('احجز موعدك في ' + b.name + ' بسهولة:\n', 'Book your appointment at ' + b.name + ' easily:\n') + u; if(navigator.share) navigator.share({ text:t }).catch(() => {}); else { navigator.clipboard?.writeText(t); toast('تم نسخ الرابط'); } };
+  $('#shareMe').onclick = () => { const u = bizLink(b.id), t = L('احجز موعدك في ' + b.name + ' بسهولة:\n', 'Book your appointment at ' + b.name + ' easily:\n') + u; if(navigator.share) navigator.share({ text:t }).catch(() => {}); else { navigator.clipboard?.writeText(t); toast('تم نسخ الرابط'); } };
   rpc('mw_biz_stats', { p_phone:OWN.phone, p_code:OWN.code }).then(s => { $('#stats').innerHTML = [['اليوم', s.today], ['هالأسبوع', s.week], ['هالشهر', s.month], ['ما حضروا', s.noshow]].map(([n, v]) => `<div><b>${v}</b><small>${n}</small></div>`).join(''); }).catch(() => {});
   try{
     const list = await rpc('mw_biz_day', { p_phone:OWN.phone, p_code:OWN.code, p_day:ownDay });
@@ -246,7 +249,7 @@ function ownSettings(){
 function renderOwnAuth(mode){
   const reg = mode === 'reg';
   $('#app').innerHTML = `<div class="ptitle"><div><small>لصاحب المحل</small><h1>${reg ? 'سجّل محلك' : 'دخول المحل'}</h1></div></div>
-    ${reg ? `<div class="pitch">${[['📅','الزبائن يحجزون بأنفسهم 24 ساعة'],['🔔','تذكير بالواتساب قبل الموعد بضغطة'],['📊','تعرف عدد الحجوزات واللي ما حضروا'],['🎁','أول 30 يوم مجاناً']].map(([i, t]) => `<div><span class="e3d sm">${i}</span>${t}</div>`).join('')}</div>` : ''}
+    ${reg ? `<div class="pitch">${[['📅','الزبائن يحجزون بأنفسهم 24 ساعة'],['🔔','تذكير بالواتساب قبل الموعد بضغطة'],['📊','تعرف عدد الحجوزات واللي ما حضروا']].concat(NATIVE ? [] : [['🎁','أول 30 يوم مجاناً']]).map(([i, t]) => `<div><span class="e3d sm">${i}</span>${t}</div>`).join('')}</div>` : ''}
     <div class="card form">
       ${reg ? `<label>اسم المحل<input id="rName" maxlength="60" placeholder="مثال: صالون الأناقة"></label>
         <label>النوع<select id="rCat">${CATS.map(c => `<option value="${c[0]}">${c[2]} ${c[1]}</option>`).join('')}</select></label>
@@ -275,4 +278,4 @@ function renderOwnAuth(mode){
 /* ---------- start ---------- */
 const qb = new URLSearchParams(location.search).get('b');
 if(qb) openBiz(qb); else render();
-if('serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+if(!NATIVE && 'serviceWorker' in navigator) addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));

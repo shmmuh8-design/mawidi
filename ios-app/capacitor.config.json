@@ -1,0 +1,10 @@
+{
+  "appId": "com.salemaljabri.mawidi",
+  "appName": "موعدي",
+  "webDir": "www",
+  "backgroundColor": "#0f0c22",
+  "ios": {
+    "contentInset": "never",
+    "backgroundColor": "#0f0c22"
+  }
+}
