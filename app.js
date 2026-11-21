@@ -48,16 +48,35 @@ $$('#nav [data-v]').forEach(b => b.onclick = () => setView(b.dataset.v));
 /* ---------- home ---------- */
 function govOptions(sel){ return Object.keys(GOV).map(g => `<option ${g === sel ? 'selected' : ''}>${g}</option>`).join(''); }
 function wilOptions(gov, sel, any){ return (any ? `<option value="">كل الولايات</option>` : '') + (GOV[gov] || []).map(w => `<option ${w === sel ? 'selected' : ''}>${w}</option>`).join(''); }
+function openSos(){
+  const d = document.createElement('div'); d.className = 'sosbg';
+  d.innerHTML = `<div class="sosbox" role="dialog" aria-label="طوارئ"><div style="font-size:46px">🚑</div><h2>حالة طارئة؟</h2><p>اتصل على رقم الطوارئ في عُمان مباشرة — الاتصال مجاني.</p>
+    <a class="sos-call" href="tel:9999">📞 اتصل 9999</a>
+    <button class="sos-loc" id="sosLoc">📍 أرسل موقعي لأهلي (واتساب)</button>
+    <button class="sos-x" id="sosX">إغلاق</button>
+    <p style="margin-top:12px;font-size:13px">موعدي تطبيق خاص وغير تابع لأي جهة حكومية، وما يرسل إسعاف بنفسه.</p></div>`;
+  document.body.appendChild(d);
+  const close = () => d.remove();
+  d.onclick = e => { if(e.target === d) close(); }; $('#sosX').onclick = close;
+  $('#sosLoc').onclick = () => {
+    const send = u => { location.href = 'https://wa.me/?text=' + encodeURIComponent('🚨 أحتاج مساعدة! هذا موقعي:\n' + u); };
+    if(!navigator.geolocation){ toast('الموقع مو متاح في جهازك'); return; }
+    toast('جاري تحديد موقعك…');
+    navigator.geolocation.getCurrentPosition(p => send('https://maps.google.com/?q=' + p.coords.latitude.toFixed(6) + ',' + p.coords.longitude.toFixed(6)),
+      () => toast('ما قدرنا نحدد موقعك — فعّل خدمات الموقع'), { enableHighAccuracy:true, timeout:12000 });
+  };
+}
 async function renderHome(){
   $('#app').innerHTML = `
     <header class="hero">
-      <div class="brand">${'<span class="logo3d"><span>📅</span></span>'}<div><h1>موعدي</h1><small>احجز موعدك بضغطة — بدون انتظار</small></div></div>
+      <div class="brand">${'<span class="logo3d"><span>📅</span></span>'}<div><h1>موعدي</h1><small>احجز موعدك بضغطة — بدون انتظار</small></div><button class="sos" id="sosBtn">🚑 طوارئ</button></div>
       <div class="where"><select id="gov" aria-label="المحافظة">${govOptions(S.gov)}</select><select id="wil" aria-label="الولاية">${wilOptions(S.gov, S.wilayat, true)}</select></div>
     </header>
     <h2 class="sec-h">وش تبي تحجز؟</h2>
     <div class="cats">${CATS.map(c => `<button class="cat ${S.cat === c[0] ? 'on' : ''}" data-cat="${c[0]}">${ico(c[0])}<b>${c[1]}</b></button>`).join('')}</div>
     <div class="row-h"><h2 class="sec-h">${S.cat ? CAT[S.cat][1] : 'كل الأماكن'} ${S.wilayat ? '— ' + esc(S.wilayat) : '— ' + esc(S.gov)}</h2>${S.cat ? '<button class="link" id="allCats">عرض الكل</button>' : ''}</div>
     <div id="list"><div class="sk"></div><div class="sk"></div></div>`;
+  $('#sosBtn').onclick = openSos;
   $('#gov').onchange = e => { S.gov = e.target.value; S.wilayat = ''; saveS(); renderHome(); };
   $('#wil').onchange = e => { S.wilayat = e.target.value; saveS(); renderHome(); };
   $$('[data-cat]').forEach(b => b.onclick = () => { S.cat = S.cat === b.dataset.cat ? '' : b.dataset.cat; saveS(); renderHome(); });
