@@ -25,7 +25,7 @@ async function rpc(fn, args){
   try{ r = await fetch(SB.url + '/rest/v1/rpc/' + fn, { method:'POST', headers:{ apikey:SB.key, 'Content-Type':'application/json' }, body:JSON.stringify(args || {}) }); }
   catch(e){ throw new Error('ما فيه اتصال بالإنترنت، حاول مرة ثانية'); }
   const tx = await r.text(); let j = null; try{ j = tx ? JSON.parse(tx) : null; }catch(e){}
-  if(!r.ok) throw new Error((j && j.message) || 'صار خطأ، حاول مرة ثانية');
+  if(!r.ok){ const m = (j && j.message) || ''; throw new Error(/schema cache|does not exist|PGRST20/.test(m) ? 'الخدمة قيد التجهيز، جرّب بعد شوي 🙏' : (m || 'صار خطأ، حاول مرة ثانية')); }
   return j;
 }
 
