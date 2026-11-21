@@ -1,0 +1,172 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<meta name="theme-color" content="#0f0c22">
+<title>إدارة موعدي</title>
+<link rel="icon" href="icons/icon-512.png">
+<style>
+@font-face{font-family:"FTajawal";src:url(fonts/tajawal-500.woff) format("woff");font-weight:100 500;font-display:swap}
+@font-face{font-family:"FTajawal";src:url(fonts/tajawal-700.woff) format("woff");font-weight:600 700;font-display:swap}
+@font-face{font-family:"FTajawal";src:url(fonts/tajawal-800.woff) format("woff");font-weight:800 900;font-display:swap}
+:root{--bg:#0f0c22;--surface:#1a1636;--s2:#221d44;--fg:#efeaff;--muted:#a59fcc;--line:#2c2652;--acc:#8a72ff;--ok:#2fd27a;--warn:#ffb84d;--red:#ff5a6e;color-scheme:dark}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+[hidden]{display:none!important}
+html,body{margin:0;background:var(--bg);color:var(--fg);font:500 16px/1.55 "FTajawal",system-ui,sans-serif}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+main{max-width:640px;margin:0 auto;padding:calc(env(safe-area-inset-top,0px) + 14px) 16px 40px}
+h1,h2,h3{margin:0;font-weight:900;line-height:1.3}
+.top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.logo{display:grid;place-items:center;width:52px;height:52px;border-radius:16px;font-size:26px;background:radial-gradient(120% 90% at 30% 15%,#ffe08a,#f0a91b 45%,#b86d00);box-shadow:0 8px 18px rgba(240,169,27,.35),inset 0 2px 0 rgba(255,255,255,.5)}
+.top small{color:var(--muted)}
+.top .out{margin-inline-start:auto;border:1px solid var(--line);background:none;border-radius:12px;padding:6px 12px;font-size:14px}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:20px;padding:16px;margin-bottom:12px}
+.login{max-width:380px;margin:12vh auto 0;text-align:center}
+.login input{width:100%;margin:14px 0 10px;padding:14px;border-radius:14px;border:1.5px solid var(--line);background:var(--bg);font-size:18px;text-align:center;letter-spacing:2px}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:6px;border:0;border-radius:14px;padding:12px 16px;font-weight:800;background:linear-gradient(180deg,#a28cff,#6a4dff);color:#fff;box-shadow:0 6px 16px rgba(106,77,255,.35)}
+.btn.w{width:100%}
+.btn.sm{padding:8px 11px;font-size:14px;border-radius:11px;box-shadow:none}
+.btn.g{background:var(--s2);color:var(--fg);border:1px solid var(--line)}
+.btn.ok{background:linear-gradient(180deg,#45e08f,#16a06a)}
+.btn.red{background:none;color:var(--red);border:1px solid color-mix(in srgb,var(--red) 40%,transparent)}
+.stats{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;margin-bottom:12px}
+.stats div{background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:10px 4px;text-align:center}
+.stats b{display:block;font-size:22px;font-weight:900}.stats small{color:var(--muted);font-size:12px}
+.stats .p b{color:var(--ok)}.stats .t b{color:var(--acc)}.stats .x b{color:var(--red)}
+.money{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.money b{font-size:22px;color:var(--ok)}
+.money label{display:flex;align-items:center;gap:6px;color:var(--muted);font-size:14px}
+.money input{width:64px;padding:6px;border-radius:10px;border:1px solid var(--line);background:var(--bg);text-align:center}
+.bar{display:flex;gap:8px;margin-bottom:10px}
+.bar input{flex:1;min-width:0;padding:11px 14px;border-radius:14px;border:1.5px solid var(--line);background:var(--surface)}
+.chips{display:flex;gap:6px;overflow-x:auto;margin-bottom:12px;scrollbar-width:none}
+.chips button{flex:0 0 auto;border:1px solid var(--line);background:var(--surface);border-radius:999px;padding:6px 14px;font-weight:700;font-size:14px}
+.chips button.on{background:var(--acc);border-color:var(--acc);color:#fff}
+.biz h3{font-size:18px}
+.biz .meta{color:var(--muted);font-size:14px}
+.biz .row{display:flex;align-items:flex-start;gap:10px}
+.st{margin-inline-start:auto;flex:0 0 auto;border-radius:999px;padding:3px 10px;font-size:13px;font-weight:800;white-space:nowrap}
+.st.paid{background:color-mix(in srgb,var(--ok) 18%,transparent);color:var(--ok)}
+.st.trial{background:color-mix(in srgb,var(--acc) 20%,transparent);color:#b9a9ff}
+.st.exp{background:color-mix(in srgb,var(--red) 18%,transparent);color:var(--red)}
+.st.block{background:#3a1220;color:var(--red)}
+.until{margin:8px 0;font-size:15px}.until.soon{color:var(--warn)}
+.acts{display:flex;flex-wrap:wrap;gap:6px;margin-top:8px}
+.note{margin-top:6px;font-size:13px;color:var(--warn)}
+.empty{text-align:center;color:var(--muted);padding:26px}
+.rep{font-size:14px;border-bottom:1px solid var(--line);padding:8px 0}.rep:last-child{border:0}
+.rep small{color:var(--muted)}
+#toast{position:fixed;left:50%;bottom:calc(24px + env(safe-area-inset-bottom,0px));transform:translate(-50%,20px);opacity:0;background:#fff;color:#1d1640;padding:10px 18px;border-radius:14px;font-weight:800;transition:.25s;pointer-events:none;max-width:90%;text-align:center;z-index:9}
+#toast.on{opacity:1;transform:translate(-50%,0)}
+@media (max-width:420px){.stats{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<main id="app"></main>
+<div id="toast" role="status"></div>
+<script src="config.js"></script>
+<script>
+const SB = window.MW_SB, $ = s => document.querySelector(s), $$ = s => document.querySelectorAll(s);
+const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+const CAT = { barber:'💈 حلاق', salon:'💅 صالون نسائي', dental:'🦷 عيادة أسنان', clinic:'🩺 عيادة', beauty:'💆 تجميل وسبا', carwash:'🚗 غسيل سيارات', garage:'🔧 ورشة', gym:'🏋️ نادي ومدرب', photo:'📸 تصوير', other:'✨ أخرى' };
+let CODE = '', D = null, filter = 'all', q = '';
+try{ CODE = sessionStorage.getItem('mw-admin') || ''; }catch(e){}
+let PRICE = 5; try{ PRICE = +localStorage.getItem('mw-admin-price') || 5; }catch(e){}
+function toast(m){ const t = $('#toast'); t.textContent = m; t.classList.add('on'); clearTimeout(t._h); t._h = setTimeout(() => t.classList.remove('on'), 2400); }
+async function rpc(fn, args){
+  let r; try{ r = await fetch(SB.url + '/rest/v1/rpc/' + fn, { method:'POST', headers:{ apikey:SB.key, 'Content-Type':'application/json' }, body:JSON.stringify(args) }); }
+  catch(e){ throw new Error('ما فيه اتصال بالإنترنت'); }
+  const j = await r.json().catch(() => null);
+  if(!r.ok) throw new Error(j && /schema cache|does not exist/.test(j.message || '') ? 'شغّل ملف admin.sql في Supabase أول' : (j && j.message) || 'صار خطأ');
+  if(j && j.err) throw new Error(j.err);
+  return j;
+}
+const today = () => new Date().toISOString().slice(0, 10);
+const daysLeft = d => Math.ceil((new Date(d + 'T23:59:59') - new Date()) / 864e5);
+const local = p => String(p).replace(/^968/, '');
+function status(b){
+  if(b.blocked) return ['block', '⛔ موقوف'];
+  if(b.paid) return ['paid', '✅ مشترك'];
+  if(b.until >= today()) return ['trial', '🎁 تجريبي'];
+  return ['exp', '⌛ منتهي'];
+}
+
+function renderLogin(msg){
+  $('#app').innerHTML = `<div class="login card"><div class="logo" style="margin:0 auto">🔐</div><h2 style="margin-top:12px">إدارة موعدي</h2>
+    <p style="color:var(--muted);margin:6px 0 0">لصاحب التطبيق فقط</p>
+    <input id="code" type="password" autocomplete="current-password" placeholder="رمز الإدارة" dir="ltr">
+    <button class="btn w" id="go">دخول</button>${msg ? `<p style="color:var(--red);margin:10px 0 0">${esc(msg)}</p>` : ''}</div>`;
+  const go = async () => { CODE = $('#code').value.trim(); if(!CODE) return; $('#go').disabled = true; try{ await load(); try{ sessionStorage.setItem('mw-admin', CODE); }catch(e){} }catch(e){ CODE = ''; renderLogin(e.message); } };
+  $('#go').onclick = go; $('#code').onkeydown = e => { if(e.key === 'Enter') go(); }; $('#code').focus();
+}
+async function load(){ D = await rpc('mw_admin_list', { p_code:CODE }); render(); }
+
+function render(){
+  const s = D.stats, list = D.biz.filter(b => {
+    const k = status(b)[0];
+    if(filter === 'soon' && !(k !== 'block' && daysLeft(b.until) >= 0 && daysLeft(b.until) <= 7)) return false;
+    if(!['all','soon'].includes(filter) && k !== filter) return false;
+    return !q || (b.name + ' ' + b.phone + ' ' + b.wilayat).includes(q);
+  });
+  const soon = D.biz.filter(b => !b.blocked && daysLeft(b.until) >= 0 && daysLeft(b.until) <= 7).length;
+  $('#app').innerHTML = `
+    <div class="top"><div class="logo">📅</div><div><h1>إدارة موعدي</h1><small>المحلات والاشتراكات</small></div><button class="out" id="out">خروج</button></div>
+    <div class="stats"><div><b>${s.total}</b><small>كل المحلات</small></div><div class="p"><b>${s.paid}</b><small>مشتركين</small></div>
+      <div class="t"><b>${s.trial}</b><small>تجريبي</small></div><div class="x"><b>${s.expired}</b><small>منتهي</small></div><div><b>${s.books30}</b><small>حجز/٣٠ يوم</small></div></div>
+    <div class="card money"><div><small style="color:var(--muted)">الدخل الشهري المتوقع</small><br><b>${(s.paid * PRICE).toFixed(3).replace(/\.?0+$/, '')} ر.ع</b></div>
+      <label>سعر المحل<input id="price" type="number" min="0" step="0.5" value="${PRICE}" inputmode="decimal"> ر.ع</label></div>
+    <div class="bar"><input id="q" placeholder="🔎 ابحث بالاسم أو الرقم أو الولاية" value="${esc(q)}"><button class="btn g" id="re">↻</button></div>
+    <div class="chips">${[['all','الكل'],['soon',`⏰ ينتهي قريب (${soon})`],['paid','مشتركين'],['trial','تجريبي'],['exp','منتهي'],['block','موقوف']].map(([k, n]) => `<button data-f="${k}" class="${filter === k ? 'on' : ''}">${n}</button>`).join('')}</div>
+    <div id="list">${list.length ? list.map(card).join('') : '<div class="card empty">ما فيه محلات هنا</div>'}</div>
+    ${D.reports.length ? `<h2 style="margin:18px 0 8px;font-size:18px">🚩 البلاغات</h2><div class="card">${D.reports.map(r => `<div class="rep"><b>${esc(r.name || 'محل محذوف')}</b> — ${esc(r.reason || 'بدون سبب')}<br><small>${r.at}</small></div>`).join('')}</div>` : ''}`;
+  $('#out').onclick = () => { CODE = ''; try{ sessionStorage.removeItem('mw-admin'); }catch(e){} renderLogin(); };
+  $('#re').onclick = () => load().then(() => toast('تم التحديث')).catch(e => toast(e.message));
+  $('#q').oninput = e => { q = e.target.value.trim(); const pos = e.target.selectionStart; render(); const i = $('#q'); i.focus(); i.setSelectionRange(pos, pos); };
+  $('#price').onchange = e => { PRICE = Math.max(0, +e.target.value || 0); try{ localStorage.setItem('mw-admin-price', PRICE); }catch(x){} render(); };
+  $$('[data-f]').forEach(b => b.onclick = () => { filter = b.dataset.f; render(); });
+  $$('[data-act]').forEach(b => b.onclick = () => act(b.dataset.act, b.dataset.id, b));
+}
+function card(b){
+  const [k, n] = status(b), left = daysLeft(b.until);
+  return `<div class="card biz"><div class="row"><div><h3>${esc(b.name)}</h3><div class="meta">${CAT[b.cat] || b.cat} · 📍 ${esc(b.wilayat)}${b.area ? '، ' + esc(b.area) : ''} · <span dir="ltr">${local(b.phone)}</span></div></div><span class="st ${k}">${n}</span></div>
+    <div class="until ${left >= 0 && left <= 7 && !b.blocked ? 'soon' : ''}">${b.paid ? '💳 مشترك لين' : '🎁 مجاني لين'} <b>${b.until}</b> ${left >= 0 ? `(باقي ${left} يوم)` : `(انتهى من ${-left} يوم)`}</div>
+    <div class="meta">📅 سجّل ${b.created} · 📋 ${b.books30} حجز آخر ٣٠ يوم${b.reports ? ` · 🚩 ${b.reports} بلاغ` : ''}</div>
+    ${b.note ? `<div class="note">📝 ${esc(b.note)}</div>` : ''}
+    <div class="acts">
+      <button class="btn ok sm" data-act="m1" data-id="${b.id}">+ شهر</button>
+      <button class="btn ok sm" data-act="m3" data-id="${b.id}">+ ٣ أشهر</button>
+      <button class="btn ok sm" data-act="m12" data-id="${b.id}">+ سنة</button>
+      <button class="btn g sm" data-act="t7" data-id="${b.id}">+٧ أيام مجانية</button>
+      <button class="btn g sm" data-act="wa" data-id="${b.id}">💬 واتساب</button>
+      ${b.paid ? `<button class="btn red sm" data-act="m0" data-id="${b.id}">إلغاء الاشتراك</button>` : ''}
+      <button class="btn red sm" data-act="${b.blocked ? 'unblock' : 'block'}" data-id="${b.id}">${b.blocked ? '↩︎ إرجاع' : '⛔ إيقاف'}</button>
+    </div></div>`;
+}
+async function act(a, id, btn){
+  const b = D.biz.find(x => x.id === id); if(!b) return;
+  if(a === 'wa'){
+    const left = daysLeft(b.until);
+    const msg = left >= 0
+      ? `السلام عليكم ${b.name} 🌹\nمعك إدارة موعدي. ${b.paid ? 'اشتراككم' : 'الفترة المجانية'} تنتهي بتاريخ ${b.until} (باقي ${left} يوم).\nللتجديد: الاشتراك الشهري ${PRICE} ر.ع، وبعد التحويل نفعّله لكم على طول ✅`
+      : `السلام عليكم ${b.name} 🌹\nمعك إدارة موعدي. انتهى اشتراككم بتاريخ ${b.until}، ومحلكم مخفي حالياً عن الزبائن.\nللتجديد: الاشتراك الشهري ${PRICE} ر.ع، وبعد التحويل نرجعكم على طول ✅`;
+    window.open('https://wa.me/' + b.phone + '?text=' + encodeURIComponent(msg), '_blank'); return;
+  }
+  let fn, args, ok;
+  if(a[0] === 'm'){ const m = +a.slice(1);
+    if(m === 0){ if(!confirm('إلغاء اشتراك «' + b.name + '»؟')) return; }
+    else if(!confirm(`تفعيل «${b.name}» ${m === 12 ? 'سنة' : m === 1 ? 'شهر' : m + ' أشهر'}؟\nتأكد إنه دفع قبل.`)) return;
+    fn = 'mw_admin_extend'; args = { p_code:CODE, p_id:id, p_months:m }; ok = m ? 'تم التفعيل ✅' : 'تم إلغاء الاشتراك'; }
+  else if(a === 't7'){ fn = 'mw_admin_trial'; args = { p_code:CODE, p_id:id, p_days:7 }; ok = 'تمت إضافة ٧ أيام 🎁'; }
+  else if(a === 'block'){ const note = prompt('سبب الإيقاف (اختياري)', b.note || ''); if(note === null) return; fn = 'mw_admin_block'; args = { p_code:CODE, p_id:id, p_blocked:true, p_note:note }; ok = 'تم إيقاف المحل'; }
+  else if(a === 'unblock'){ fn = 'mw_admin_block'; args = { p_code:CODE, p_id:id, p_blocked:false, p_note:'' }; ok = 'رجع المحل ✅'; }
+  btn.disabled = true;
+  try{ await rpc(fn, args); toast(ok); await load(); }
+  catch(e){ toast(e.message); btn.disabled = false; if(/الرمز/.test(e.message)) renderLogin(e.message); }
+}
+CODE ? load().catch(e => { CODE = ''; renderLogin(e.message); }) : renderLogin();
+</script>
+</body>
+</html>
